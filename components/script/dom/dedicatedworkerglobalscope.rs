@@ -9,6 +9,7 @@ use crate::dom::abstractworkerglobalscope::{SendableWorkerScriptChan, WorkerThre
 use crate::dom::bindings::cell::DomRefCell;
 use crate::dom::bindings::codegen::Bindings::DedicatedWorkerGlobalScopeBinding;
 use crate::dom::bindings::codegen::Bindings::DedicatedWorkerGlobalScopeBinding::DedicatedWorkerGlobalScopeMethods;
+use crate::dom::bindings::codegen::Bindings::WorkerBinding::WorkerType;
 use crate::dom::bindings::error::{ErrorInfo, ErrorResult};
 use crate::dom::bindings::inheritance::Castable;
 use crate::dom::bindings::reflector::DomObject;
@@ -211,6 +212,8 @@ impl WorkerEventLoopMethods for DedicatedWorkerGlobalScope {
 impl DedicatedWorkerGlobalScope {
     fn new_inherited(
         init: WorkerGlobalScopeInit,
+        worker_name: DOMString,
+        worker_type: WorkerType,
         worker_url: ServoUrl,
         from_devtools_receiver: Receiver<DevtoolScriptControlMsg>,
         runtime: Runtime,
@@ -224,6 +227,8 @@ impl DedicatedWorkerGlobalScope {
         DedicatedWorkerGlobalScope {
             workerglobalscope: WorkerGlobalScope::new_inherited(
                 init,
+                worker_name,
+                worker_type,
                 worker_url,
                 runtime,
                 from_devtools_receiver,
@@ -241,6 +246,8 @@ impl DedicatedWorkerGlobalScope {
     #[allow(unsafe_code)]
     pub fn new(
         init: WorkerGlobalScopeInit,
+        worker_name: DOMString,
+        worker_type: WorkerType,
         worker_url: ServoUrl,
         from_devtools_receiver: Receiver<DevtoolScriptControlMsg>,
         runtime: Runtime,
@@ -254,6 +261,8 @@ impl DedicatedWorkerGlobalScope {
         let cx = runtime.cx();
         let scope = Box::new(DedicatedWorkerGlobalScope::new_inherited(
             init,
+            worker_name,
+            worker_type,
             worker_url,
             from_devtools_receiver,
             runtime,
@@ -278,6 +287,8 @@ impl DedicatedWorkerGlobalScope {
         own_sender: Sender<DedicatedWorkerScriptMsg>,
         receiver: Receiver<DedicatedWorkerScriptMsg>,
         worker_load_origin: WorkerScriptLoadOrigin,
+        worker_name: String,
+        worker_type: WorkerType,
         closing: Arc<AtomicBool>,
     ) {
         let serialized_worker_url = worker_url.to_string();
@@ -356,6 +367,8 @@ impl DedicatedWorkerGlobalScope {
 
                 let global = DedicatedWorkerGlobalScope::new(
                     init,
+                    DOMString::from_string(worker_name),
+                    worker_type,
                     url,
                     devtools_mpsc_port,
                     runtime,
